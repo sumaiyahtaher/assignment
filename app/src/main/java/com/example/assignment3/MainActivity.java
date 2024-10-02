@@ -1,103 +1,105 @@
 package com.example.assignment3;
 
-import androidx.appcompat.app.AppCompatActivity;
+import static java.util.EnumSet.of;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.widget.CheckBox;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.RatingBar;
-import android.widget.SeekBar;
-import android.widget.Switch;
-import android.widget.TextView;
-import android.widget.Toast;
-import android.view.View;
+import android.text.TextUtils;
+import android.util.Patterns;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 public class MainActivity extends AppCompatActivity {
 
-    private CheckBox checkBoxTerms;
-    private RadioGroup radioGroupGender;
-    private RatingBar ratingBar;
-    private SeekBar seekBar;
-    private TextView seekBarValue;
-    private Switch switchNotifications;
-    private Button submitButton;
+    private EditText etRegisterName, etRegisterEmail,etRegisterPassword,etConfirmPassword,etRegisterPhone;
+    private Button btnSignupLogin,btnSignupRegister;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        etRegisterName = findViewById(R.id.et_register_name);
+        etRegisterEmail = findViewById(R.id.et_register_email);
+        etRegisterPassword = findViewById(R.id.et_register_password);
+        etConfirmPassword = findViewById(R.id.et_confirm_password);
+        etRegisterPhone = findViewById(R.id.et_register_phone);
 
-        checkBoxTerms = findViewById(R.id.checkboxTerms);
-        radioGroupGender = findViewById(R.id.radioGroupGender);
-        ratingBar = findViewById(R.id.ratingBar);
-        seekBar = findViewById(R.id.seekBar);
-        seekBarValue = findViewById(R.id.seekBarValue);
-        switchNotifications = findViewById(R.id.switchNotifications);
-        submitButton = findViewById(R.id.submitButton);
+        btnSignupLogin = findViewById(R.id.btn_sign_up_login);
+        btnSignupRegister = findViewById(R.id.btn_sign_up_register);
 
+        btnSignupRegister.setOnClickListener(v -> {
+            if (validateInputs()) {
 
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                seekBarValue.setText("SeekBar Value: " + progress);
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
+                Toast.makeText(MainActivity.this, "Registration Succesful!", Toast.LENGTH_SHORT).show();
             }
         });
 
-
-        submitButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                validateForm();
-            }
+        btnSignupLogin.setOnClickListener(v -> {
+            Toast.makeText(MainActivity.this, "Redirecting to login", Toast.LENGTH_SHORT).show();
         });
+
     }
 
+    private boolean validateInputs() {
+        String name = etRegisterName.getText().toString();
+        String email = etRegisterEmail.getText().toString();
+        String password = etRegisterPassword.getText().toString();
+        String confirmPassword = etConfirmPassword.getText().toString();
+        String phone = etRegisterPhone.getText().toString();
 
-    private void validateForm() {
-        // Validate CheckBox (Terms & Conditions)
-        if (!checkBoxTerms.isChecked()) {
-            Toast.makeText(this, "Please agree to the Terms and Conditions.", Toast.LENGTH_SHORT).show();
-            return;
+        if (TextUtils.isEmpty(name) || !isValidName(name)) {
+            etRegisterName.setError("Invalid Name");
+            return false;
         }
 
-
-        int selectedGenderId = radioGroupGender.getCheckedRadioButtonId();
-        if (selectedGenderId == -1) {
-            Toast.makeText(this, "Please select your gender.", Toast.LENGTH_SHORT).show();
-            return;
+        if (TextUtils.isEmpty(email) || !isValidEmail(email)) {
+            etRegisterEmail.setError("Invalid Email");
+            return false;
         }
-        RadioButton selectedGenderButton = findViewById(selectedGenderId);
-        String gender = selectedGenderButton.getText().toString();
 
+        if (TextUtils.isEmpty(password) || !isValidPassword(password)) {
+            etRegisterPassword.setError("Invalid Password");
+            return false;
+        }
 
-        float rating = ratingBar.getRating();
+        if (!password.equals(confirmPassword)) {
+            etConfirmPassword.setError("Passwords do not match");
+            return false;
+        }
 
+        if (TextUtils.isEmpty(phone) || !isValidPhone(phone)) {
+            etRegisterPhone.setError("Invalid Phone Number");
+            return false;
+        }
 
-        int seekBarValueInt = seekBar.getProgress();
+        return true;
 
+    }
 
-        boolean notificationsEnabled = switchNotifications.isChecked();
+    private boolean isValidName(String name) {
+        return name.matches("^([A-Z][a-z]+)(\\s[A-Z][a-z]+)*$");
+    }
 
+    private boolean isValidEmail(String email) {
+        return Patterns.EMAIL_ADDRESS.matcher(email).matches();
+    }
 
-        String summary = "Gender: " + gender +
-                "\nRating: " + rating +
-                "\nSeekBar Value: " + seekBarValueInt +
-                "\nNotifications: " + (notificationsEnabled ? "Enabled" : "Disabled");
+    private boolean isValidPassword(String password) {
+        return password.matches("^(?=.[A-Z])(?=.[a-z])(?=.\\d)(?=.[\\W_]).{6,}$");
+    }
 
+    //^(?=.[a-z])(?=.[A-Z])(?=.\d)(?=.[@$!%?&])[A-Za-z\d@$!%?&]{6,}$
+    //^(?=.[A-Z])(?=.[a-z])(?=./d)(?=.[\W_]).{6,}$
 
-        Toast.makeText(this, summary, Toast.LENGTH_LONG).show();
+    private boolean isValidPhone(String phone) {
+        return phone.matches("^(\\+8801[3-9]|01[3-9])[\\d]{8}$");
     }
 }
